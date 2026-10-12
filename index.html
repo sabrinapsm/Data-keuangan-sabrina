@@ -123,31 +123,28 @@
                     <button type="button" onclick="switchAuthView('reset')" class="text-slate-600 hover:text-slate-800 transition">Lupa / Reset Password?</button>
                 </div>
             </div>
-
             <!-- 2. FORM REGISTER -->
-            <div id="form-register-container" class="hidden">
-                <div class="text-center mb-6">
-                    <h2 class="text-3xl font-bold text-gold-dark">Daftar Admin Baru</h2>
-                    <p class="text-sm text-slate-600 mt-1">Buat akun admin untuk akses dashboard</p>
-                </div>
-                <form onsubmit="handleRegister(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Username Baru</label>
-                        <input type="text" id="reg-username" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Password Baru</label>
-                        <input type="password" id="reg-password" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
-                    </div>
-                    <div id="reg-success" class="text-xs text-emerald-600 hidden font-semibold">Pendaftaran berhasil! Silakan login.</div>
-                    <div id="reg-error" class="text-xs text-rose-600 hidden font-semibold">Username sudah terdaftar!</div>
-                    <button type="submit" class="w-full py-3 rounded-xl btn-gold shadow-lg">Daftarkan Admin</button>
-                </form>
-                <div class="text-center mt-5">
-                    <button type="button" onclick="switchAuthView('login')" class="text-xs text-amber-800 hover:underline font-medium">Sudah punya akun? Kembali ke Login</button>
-                </div>
-            </div>
-
+            <!-- Bagian Form Registrasi -->
+<!-- 2. FORM REGISTER -->
+<div id="form-register-container" class="hidden">
+  <div class="text-center mb-6">
+    <h2 class="text-3xl font-bold text-gold-dark">Daftar Admin Baru</h2>
+    <p class="text-sm text-slate-600 mt-1">Buat akun admin untuk akses dashboard</p>
+  </div>
+  <form onsubmit="handleRegister(event)" class="space-y-4">
+    <div>
+      <label class="block text-xs font-medium text-slate-700 mb-1">Username Baru</label>
+      <input type="text" id="reg-username" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:outline-none focus:border-amber-500">
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-700 mb-1">Password Baru</label>
+      <input type="password" id="reg-password" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:outline-none focus:border-amber-500">
+    </div>
+    <div id="reg-success" class="text-xs text-emerald-600 hidden font-semibold">Pendaftaran berhasil! Silakan login.</div>
+    <div id="reg-error" class="text-xs text-rose-600 hidden font-semibold">Username sudah terdaftar!</div>
+    <button type="submit" class="w-full py-3 rounded-xl btn-gold shadow-lg">Daftarkan Admin</button>
+  </form>
+</div>
             <!-- 3. FORM RESET PASSWORD -->
             <div id="form-reset-container" class="hidden">
                 <div class="text-center mb-6">
@@ -527,13 +524,15 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script type="module">
-        // --- KONEKSI SUPABASE ONLINE ---
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  
-  const supabaseUrl = 'https://wvrbwtzgfojsjdaadqrh.supabase.co'
-  const supabaseKey = 'sb_publishable_pzoiuGbC8-kEZ5ZRAXys6A_S-c0Bjbr'
-  const supabase = createClient(supabaseUrl, supabaseKey)
+    // 1. IMPORT HARUS DI PALING ATAS
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
+    // 2. INISIALISASI SUPABASE
+    const supabaseUrl = 'https://wvrbwtzgfojsdaadqrh.supabase.co'
+    const supabaseKey = 'sb_publishable_pzoiuGbC8-kEZ5ZRAXys6A_S-c0Bjbr'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // ... (fungsi-fungsi lain seperti simpanKeSupabase, handleLogin, handleRegister ada di sini)
   // Fungsi untuk menyimpan data secara online
   async function simpanKeSupabase(tabel, dataBaru) {
     const { data, error } = await supabase.from(tabel).insert([dataBaru]);
@@ -916,6 +915,9 @@ supabase
     ambilDataKeuanganOnline();
   })
   .subscribe();
-    </script>
+    window.handleRegister = handleRegister;
+    window.handleLogin = handleLogin;
+    window.switchAuthView = switchAuthView;
+</script>
 </body>
 </html>
