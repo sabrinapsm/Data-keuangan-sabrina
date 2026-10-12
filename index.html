@@ -594,55 +594,82 @@ let dbGaji = JSON.parse(localStorage.getItem('db_gaji')) || [
             if (view === 'register') document.getElementById('form-register-container').classList.remove('hidden');
             if (view === 'reset') document.getElementById('form-reset-container').classList.remove('hidden');
         }
+        async function handleLogin(e) {
+    e.preventDefault();
+    const user = document.getElementById('login-username').value.trim();
+    const pass = document.getElementById('login-password').value;
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value;
-            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
+    if (!user || !pass) {
+        alert('Username dan password harus diisi!');
+        return;
+    }
 
-            if (users[user] && users[user] === pass) {
-                localStorage.setItem('dashboard_current_user', user);
-                activateApp(user);
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
+    // Cek data akun di tabel 'users' Supabase
+    const { data: users, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', user)
+        .eq('password', pass);
+
+    if (error) {
+        console.error('Error saat login:', error);
+        alert('Gagal terhubung ke database.');
+        return;
+    }
+
+    if (users && users.length > 0) {
+        // Login Berhasil! Simpan sesi lokal & aktifkan aplikasi
+        const loggedUser = users[0];
+        localStorage.setItem('dashboard_current_user', JSON.stringify(loggedUser));
+        document.getElementById('login-error').classList.add('hidden');
+        activateApp(loggedUser);
+    } else {
+        // Jika username atau password salah
+        document.getElementById('login-error').classList.remove('hidden');
+    }
+}
+        async function handleRegister(e) {
+    e.preventDefault();
+    const user = document.getElementById('reg-username').value.trim();
+    const pass = document.getElementById('reg-password').value;
+
+    if (!user || !pass) {
+        alert('Username dan password tidak boleh kosong!');
+        return;
+    }
+
+    // 1. Cek apakah username sudah terdaftar di Supabase
+    const { data: existingUsers, error: checkError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', user);
+
+    if (checkError) {
+        console.error('Error saat mengecek user:', checkError);
+    }
+
+    if (existingUsers && existingUsers.length > 0) {
+        // Jika username sudah ada
+        document.getElementById('reg-error').innerText = 'Username sudah digunakan!';
+        document.getElementById('reg-error').classList.remove('hidden');
+        document.getElementById('reg-success').classList.add('hidden');
+    } else {
+        // 2. Simpan user baru ke database Supabase
+        const { error: insertError } = await supabase
+            .from('users')
+            .insert([{ username: user, password: pass, role: 'user' }]);
+
+        if (insertError) {
+            console.error('Gagal menyimpan user:', insertError);
+            alert('Gagal mendaftarkan akun. Silakan coba lagi.');
+        } else {
+            // Berhasil mendaftar
+            document.getElementById('reg-error').classList.add('hidden');
+            document.getElementById('reg-success').classList.remove('hidden');
+            setTimeout(() => switchAuthView('login'), 1500);
         }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const user = document.getElementById('reg-username').value.trim();
-            const pass = document.getElementById('reg-password').value;
-            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
-
-            if (users[user]) {
-                document.getElementById('reg-error').classList.remove('hidden');
-                document.getElementById('reg-success').classList.add('hidden');
-            } else {
-                users[user] = pass;
-                localStorage.setItem('db_users', JSON.stringify(users));
-                document.getElementById('reg-error').classList.add('hidden');
-                document.getElementById('reg-success').classList.remove('hidden');
-                setTimeout(() => switchAuthView('login'), 1500);
-            }
-        }
-
-        function handleResetPassword(e) {
-            e.preventDefault();
-            const user = document.getElementById('reset-username').value.trim();
-            const newPass = document.getElementById('reset-new-password').value;
-            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
-
-            if (users[user]) {
-                users[user] = newPass;
-                localStorage.setItem('db_users', JSON.stringify(users));
-                document.getElementById('reset-error').classList.add('hidden');
-                document.getElementById('reset-success').classList.remove('hidden');
-                setTimeout(() => switchAuthView('login'), 1500);
-            } else {
-                document.getElementById('reset-error').classList.remove('hidden');
-            }
-        }
+    }
+}
 
         function handleLogout() {
             localStorage.removeItem('dashboard_current_user');
