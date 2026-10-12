@@ -526,11 +526,46 @@
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // State Data Utama dengan Default Data Bawaan
-        let currentUser = localStorage.getItem('dashboard_current_user') || null;
-        let dbGaji = JSON.parse(localStorage.getItem('db_gaji')) || [
-            { id: 1, periode: 'Agustus 2026', jumlah: 22000000, status: 'Diterima' }
+    <script type="module">
+        // --- KONEKSI SUPABASE ONLINE ---
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  
+  const supabaseUrl = 'https://wvrbwtzgfojsjdaadqrh.supabase.co'
+  const supabaseKey = 'sb_publishable_pzoiuGbC8-kEZ5ZRAXys6A_S-c0Bjbr'
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  // Fungsi untuk menyimpan data secara online
+  async function simpanKeSupabase(tabel, dataBaru) {
+    const { data, error } = await supabase.from(tabel).insert([dataBaru]);
+    if (error) {
+      console.error('Gagal menyimpan ke Supabase:', error);
+    } else {
+      console.log('Berhasil tersimpan online:', data);
+    }
+  }
+        // Fungsi untuk mendapatkan teks periode 3 bulanan secara otomatis
+function getPeriode3BulanOtomatis() {
+  const skrg = new Date();
+  const bulan = skrg.getMonth(); // 0 = Jan, 1 = Feb, ..., 11 = Des
+  const tahun = skrg.getFullYear();
+
+  // Menentukan triwulan (Q1, Q2, Q3, Q4)
+  if (bulan >= 0 && bulan <= 2) {
+    return `Januari - Maret ${tahun}`;
+  } else if (bulan >= 3 && bulan <= 5) {
+    return `April - Juni ${tahun}`;
+  } else if (bulan >= 6 && bulan <= 8) {
+    return `Juli - September ${tahun}`;
+  } else {
+    return `Oktober - Desember ${tahun}`;
+  }
+}
+
+// State Data Utama dengan Default Data Bawaan
+let currentUser = localStorage.getItem('dashboard_current_user') || null;
+let dbGaji = JSON.parse(localStorage.getItem('db_gaji')) || [
+    { id: 1, periode: getPeriode3BulanOtomatis(), jumlah: 22000000, status: 'Diterima' }
+];
         ];
         let dbPengeluaran = JSON.parse(localStorage.getItem('db_pengeluaran')) || [
             { id: 1, ket: 'Transportasi & Konsumsi', jumlah: 1500000, tanggal: '2026-08-10' }
@@ -822,7 +857,38 @@
                 preview.classList.remove('hidden');
                 placeholder.classList.add('hidden');
             }
-        }
+        // --- KODE SUPABASE UNTUK ONLINE & KOLABORATIF ---
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabaseUrl = 'https://wvrbwtzgfojsjdaadqrh.supabase.co'
+const supabaseKey = 'sb_publishable_pzoiuGbC8-kEZ5ZRAXys6A_S-c0Bjbr'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Contoh fungsi ambil data saat halaman dimuat
+async function ambilDataKeuanganOnline() {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Gagal memuat data:', error)
+  } else {
+    console.log('Data berhasil dimuat dari Supabase:', data)
+    // Masukkan data ini ke fungsi tampilan tabel/grafik Anda di sini
+  }
+}
+
+// Jalankan saat halaman dibuka
+ambilDataKeuanganOnline();
+
+// Fitur Realtime: Otomatis sinkron saat ada perubahan dari orang lain
+supabase
+  .channel('public:transactions')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+    ambilDataKeuanganOnline();
+  })
+  .subscribe();
     </script>
 </body>
 </html>
