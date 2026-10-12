@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Prediksi & Administrasi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Wallpaper untuk Halaman Login / Depan */
+        .auth-bg {
+            background-image: url('https://i.pinimg.com/1200x/e9/68/e8/e968e8d7d4410e214bb97e46a161deb0.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        /* Wallpaper untuk Halaman Dashboard di dalam */
+        body {
+            background-image: url('https://i.pinimg.com/1200x/fa/9c/1e/fa9c1ead55c09e0e9d7e8e27c0c12fc3.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #2b2b2b;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Panel Terang dengan Sentuhan Gold */
+        .glass-bright {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            box-shadow: 0 10px 30px 0 rgba(31, 38, 135, 0.12);
+        }
+        .text-gold-dark { color: #8b6508; }
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #daa520);
+            color: #2b2b2b;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #ffcc00, #b8860b);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+            color: #ffffff;
+        }
+        /* Model Bubble Chat Panjang Vertikal */
+        .bubble-menu-pink {
+            background: linear-gradient(135deg, #f7a8c4, #f48fb1);
+            color: #581c2f;
+            border-radius: 9999px;
+            padding: 14px 36px;
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(244, 143, 177, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .bubble-menu-pink:hover {
+            transform: translateY(-4px) scale(1.02);
+            background: linear-gradient(135deg, #f48fb1, #ec407a);
+            color: #ffffff;
+            box-shadow: 0 15px 30px rgba(236, 64, 122, 0.5);
+        }
+        /* Bingkai Foto Pink Elegan */
+        .lace-frame-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            background-image: url('https://i.pinimg.com/736x/8f/c9/26/8fc9260d703126f554625b59ea55122f.jpg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 10px 15px rgba(219, 112, 147, 0.3));
+        }
+        .lace-photo-circle {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #fff0f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 3px solid #ffffff;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- AUTH SCREEN (LOGIN / REGISTER / RESET) -->
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center auth-bg">
+        <div class="glass-bright p-8 rounded-3xl shadow-2xl w-full max-w-md border border-amber-300/50">
+            
+            <!-- 1. FORM LOGIN -->
+            <div id="form-login-container">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-gold-dark">Admin Login</h2>
+                    <p class="text-sm text-slate-600 mt-1">Silakan masuk ke Dashboard-prediksi</p>
+                </div>
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Username</label>
+                        <input type="text" id="login-username" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div id="login-error" class="text-xs text-rose-600 hidden font-semibold">Username atau password salah!</div>
+                    <button type="submit" class="w-full py-3 rounded-xl btn-gold shadow-lg">Masuk</button>
+                </form>
+                <div class="flex justify-between items-center mt-5 text-xs">
+                    <button type="button" onclick="switchAuthView('register')" class="text-amber-800 hover:text-amber-950 font-medium transition underline">Daftar Akun Baru</button>
+                    <button type="button" onclick="switchAuthView('reset')" class="text-slate-600 hover:text-slate-800 transition">Lupa / Reset Password?</button>
+                </div>
+            </div>
+
+            <!-- 2. FORM REGISTER -->
+            <div id="form-register-container" class="hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-gold-dark">Daftar Admin Baru</h2>
+                    <p class="text-sm text-slate-600 mt-1">Buat akun admin untuk akses dashboard</p>
+                </div>
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Username Baru</label>
+                        <input type="text" id="reg-username" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Password Baru</label>
+                        <input type="password" id="reg-password" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div id="reg-success" class="text-xs text-emerald-600 hidden font-semibold">Pendaftaran berhasil! Silakan login.</div>
+                    <div id="reg-error" class="text-xs text-rose-600 hidden font-semibold">Username sudah terdaftar!</div>
+                    <button type="submit" class="w-full py-3 rounded-xl btn-gold shadow-lg">Daftarkan Admin</button>
+                </form>
+                <div class="text-center mt-5">
+                    <button type="button" onclick="switchAuthView('login')" class="text-xs text-amber-800 hover:underline font-medium">Sudah punya akun? Kembali ke Login</button>
+                </div>
+            </div>
+
+            <!-- 3. FORM RESET PASSWORD -->
+            <div id="form-reset-container" class="hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-gold-dark">Reset Password</h2>
+                    <p class="text-sm text-slate-600 mt-1">Masukkan username dan password baru Anda</p>
+                </div>
+                <form onsubmit="handleResetPassword(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Username Terdaftar</label>
+                        <input type="text" id="reset-username" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Password Baru</label>
+                        <input type="password" id="reset-new-password" required class="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-800">
+                    </div>
+                    <div id="reset-success" class="text-xs text-emerald-600 hidden font-semibold">Password berhasil direset! Silakan login.</div>
+                    <div id="reset-error" class="text-xs text-rose-600 hidden font-semibold">Username tidak ditemukan di sistem!</div>
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 text-white font-semibold transition shadow-lg">Perbarui Password</button>
+                </form>
+                <div class="text-center mt-5">
+                    <button type="button" onclick="switchAuthView('login')" class="text-xs text-amber-800 hover:underline font-medium">Kembali ke Login</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app-wrapper" class="flex-1 flex flex-col hidden">
+        
+        <!-- HEADER ATAS -->
+        <header class="glass-bright px-6 py-4 border-b border-amber-500/20 flex justify-between items-center shadow-md">
+            <button onclick="handleLogout()" class="px-4 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 text-xs font-bold transition border border-rose-500/30">Logout</button>
+            <div class="flex flex-col items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg">👑</span>
+                    <span class="font-bold text-gold-dark text-lg">Dashboard Admin</span>
+                </div>
+                <span id="current-admin-name" class="text-xs text-slate-700 font-bold mt-0.5">Halo, selamat datang -</span>
+            </div>
+            <div class="w-20"></div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 flex flex-col items-center justify-center p-6 md:p-10 max-w-4xl w-full mx-auto">
+
+            <!-- TAB 1: MENU UTAMA -->
+            <section id="tab-menu" class="tab-content w-full flex flex-col items-center space-y-3 text-center">
+                
+                <!-- BINGKAI FOTO RENDA PINK AESTHETIC -->
+                <div class="flex flex-col items-center space-y-1">
+                    <div class="lace-frame-container">
+                        <div class="lace-photo-circle">
+                            <img id="profile-preview" src="" alt="Foto Profil" class="w-full h-full object-cover hidden">
+                            <div id="profile-placeholder" class="text-[11px] text-pink-600 font-bold text-center px-2">Foto Anda</div>
+                        </div>
+                    </div>
+                    <label class="px-3 py-1 bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white text-xs font-bold rounded-xl cursor-pointer shadow-md transition">
+                        📷 Pilih Foto 
+                        <input type="file" id="profile-upload" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                    </label>
+                </div>
+
+                <!-- Bubble Menus -->
+                <div onclick="switchTab('prediksi')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> Catatan Log & Tabungan Prediksi</span>
+                </div>
+                <div onclick="switchTab('gaji')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> Catatan Gaji</span>
+                </div>
+                <div onclick="switchTab('pengeluaran')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> Catatan Pengeluaran</span>
+                </div>
+                <div onclick="switchTab('belanja')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> List Belanja & Tagihan</span>
+                </div>
+                <div onclick="switchTab('cuti')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> Jadwal Cuti</span>
+                </div>
+                <div onclick="switchTab('thr')" class="bubble-menu-pink flex items-center justify-center space-x-3">
+                    <span class="text-base"> Perhitungan THR</span>
+                </div>
+            </section>
+
+            <!-- TAB 2: CATATAN LOG & TABUNGAN PREDIKSI -->
+            <section id="tab-prediksi" class="tab-content hidden w-full space-y-6 items-center">
+                <div class="w-full flex justify-start">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                </div>
+                <div class="text-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark">Catatan Log & Tabungan Prediksi</h2>
+                    <p class="text-sm text-slate-600 mt-1">Ringkasan keuangan dan estimasi tabungan aktif Anda</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-2">
+                    <div class="glass-bright p-5 rounded-2xl border border-amber-300/60 shadow-lg text-center">
+                        <h3 class="text-xs font-medium text-slate-600">Total Gaji Diterima</h3>
+                        <p id="card-total-diterima" class="text-lg font-extrabold text-gold-dark mt-2">Rp 0</p>
+                    </div>
+                    <div class="glass-bright p-5 rounded-2xl border border-amber-300/60 shadow-lg text-center">
+                        <h3 class="text-xs font-medium text-slate-600">Total Pengeluaran</h3>
+                        <p id="card-total-pengeluaran" class="text-lg font-extrabold text-rose-600 mt-2">Rp 0</p>
+                    </div>
+                    <div class="glass-bright p-5 rounded-2xl border border-amber-300/60 shadow-lg text-center">
+                        <h3 class="text-xs font-medium text-slate-600">Total Belanja/Tagihan</h3>
+                        <p id="card-total-belanja" class="text-lg font-extrabold text-pink-600 mt-2">Rp 0</p>
+                    </div>
+                    <div class="glass-bright p-5 rounded-2xl border border-emerald-400/60 shadow-lg text-center bg-emerald-50/50">
+                        <h3 class="text-xs font-medium text-emerald-800 font-bold">✨ Tabungan Prediksi</h3>
+                        <p id="card-tabungan-prediksi" class="text-xl font-black text-emerald-700 mt-2">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-4">
+                    <div class="glass-bright p-5 rounded-2xl border border-amber-300/60 shadow-lg text-center">
+                        <h3 class="text-xs font-medium text-slate-600">Gaji Belum Diterima</h3>
+                        <p id="card-total-belum" class="text-xl font-extrabold text-amber-700 mt-2">Rp 0</p>
+                    </div>
+                    <div class="glass-bright p-5 rounded-2xl border border-amber-300/60 shadow-lg text-center">
+                        <h3 class="text-xs font-medium text-slate-600">Estimasi Total THR</h3>
+                        <p id="card-total-thr" class="text-xl font-extrabold text-emerald-600 mt-2">Rp 0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: CATATAN GAJI -->
+            <section id="tab-gaji" class="tab-content hidden w-full space-y-6">
+                <div class="flex justify-between items-center">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                    <button onclick="openGajiModal()" class="px-4 py-2.5 btn-gold text-xs font-semibold rounded-xl transition shadow-md">+ Tambah Data Gaji</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark tracking-tight">Catatan Gaji</h2>
+                    <div class="glass-bright px-4 py-2 rounded-xl border border-amber-400/50 text-xs font-bold text-amber-900">
+                        Total Seluruh Gaji: <span id="label-total-gaji" class="text-gold-dark text-sm">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="glass-bright rounded-2xl overflow-hidden border border-amber-300/60 shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-amber-500/30 bg-amber-500/10 text-xs text-amber-900 uppercase tracking-wider font-bold">
+                                <th class="p-4">Periode / Bulan</th>
+                                <th class="p-4">Jumlah Gaji</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gaji-table-body" class="divide-y divide-amber-500/20 text-sm text-slate-800 font-medium"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 4: CATATAN PENGELUARAN -->
+            <section id="tab-pengeluaran" class="tab-content hidden w-full space-y-6">
+                <div class="flex justify-between items-center">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                    <button onclick="openPengeluaranModal()" class="px-4 py-2.5 btn-gold text-xs font-semibold rounded-xl transition shadow-md">+ Tambah Pengeluaran</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark tracking-tight">Catatan Pengeluaran</h2>
+                    <div class="glass-bright px-4 py-2 rounded-xl border border-amber-400/50 text-xs font-bold text-rose-900">
+                        Total Pengeluaran: <span id="label-total-pengeluaran" class="text-rose-700 text-sm">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="glass-bright rounded-2xl overflow-hidden border border-amber-300/60 shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-amber-500/30 bg-amber-500/10 text-xs text-amber-900 uppercase tracking-wider font-bold">
+                                <th class="p-4">Keterangan / Keperluan</th>
+                                <th class="p-4">Jumlah (Rp)</th>
+                                <th class="p-4">Tanggal</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pengeluaran-table-body" class="divide-y divide-amber-500/20 text-sm text-slate-800 font-medium"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 5: LIST BELANJA & TAGIHAN -->
+            <section id="tab-belanja" class="tab-content hidden w-full space-y-6">
+                <div class="flex justify-between items-center">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                    <button onclick="openBelanjaModal()" class="px-4 py-2.5 btn-gold text-xs font-semibold rounded-xl transition shadow-md">+ Tambah List Keperluan</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark tracking-tight">List Keperluan, Belanja & Tagihan</h2>
+                    <div class="glass-bright px-4 py-2 rounded-xl border border-amber-400/50 text-xs font-bold text-pink-900">
+                        Total Anggaran List: <span id="label-total-belanja" class="text-pink-700 text-sm">Rp 0</span>
+                    </div>
+                </div>
+
+                <div class="glass-bright rounded-2xl overflow-hidden border border-amber-300/60 shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-amber-500/30 bg-amber-500/10 text-xs text-amber-900 uppercase tracking-wider font-bold">
+                                <th class="p-4">Nama Barang / Tagihan</th>
+                                <th class="p-4">Estimasi Harga</th>
+                                <th class="p-4">Detail / Toko</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="belanja-table-body" class="divide-y divide-amber-500/20 text-sm text-slate-800 font-medium"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 6: JADWAL CUTI -->
+            <section id="tab-cuti" class="tab-content hidden w-full space-y-6">
+                <div class="flex justify-between items-center">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                    <button onclick="openCutiModal()" class="px-4 py-2.5 btn-gold text-xs font-semibold rounded-xl transition shadow-md">+ Tambah Jadwal Cuti</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark tracking-tight">Jadwal Cuti</h2>
+                    <div class="glass-bright px-4 py-2 rounded-xl border border-amber-400/50 text-xs font-bold text-purple-900">
+                        Total Agenda Cuti: <span id="label-total-cuti" class="text-purple-700 text-sm">0 Agenda</span>
+                    </div>
+                </div>
+
+                <div class="glass-bright rounded-2xl overflow-hidden border border-amber-300/60 shadow-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-amber-500/30 bg-amber-500/10 text-xs text-amber-900 uppercase tracking-wider font-bold">
+                                <th class="p-4">Keterangan / Jenis Cuti</th>
+                                <th class="p-4">Tanggal Mulai</th>
+                                <th class="p-4">Tanggal Selesai</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuti-table-body" class="divide-y divide-amber-500/20 text-sm text-slate-800 font-medium"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 7: PERHITUNGAN THR -->
+            <section id="tab-thr" class="tab-content hidden w-full space-y-6 items-center">
+                <div class="w-full flex justify-start">
+                    <button onclick="switchTab('menu')" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 text-xs font-bold border border-amber-400/40">&larr; Kembali ke Menu Utama</button>
+                </div>
+                <div class="text-center">
+                    <h2 class="text-2xl font-extrabold text-gold-dark">Kalkulator Perhitungan THR</h2>
+                </div>
+                
+                <div class="glass-bright p-8 rounded-3xl border border-amber-300/60 w-full max-w-xl mx-auto space-y-5 shadow-2xl">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nominal Gaji Pokok / Standar</label>
+                        <input type="text" id="thr-gaji" value="Rp 22.000.000" oninput="formatRupiahInput(this)" class="w-full px-4 py-3 rounded-xl bg-white/90 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-900 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Bulan Bekerja</label>
+                        <input type="number" id="thr-bulan" value="39" min="1" oninput="hitungTHR()" class="w-full px-4 py-3 rounded-xl bg-white/90 border border-amber-400/50 focus:outline-none focus:border-amber-600 text-sm text-slate-900 font-bold">
+                    </div>
+                    <div class="pt-4 border-t border-amber-500/30 text-center">
+                        <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Hasil Perhitungan THR:</span>
+                        <div id="thr-hasil" class="text-4xl font-black text-gold-dark mt-2">Rp 0</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL TAMBAH GAJI -->
+    <div id="gaji-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="glass-bright p-6 rounded-3xl w-full max-w-md border border-amber-400/60 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-gold-dark">Tambah Catatan Gaji</h3>
+            <form onsubmit="saveGaji(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Periode / Bulan</label>
+                    <input type="text" id="input-periode" placeholder="Contoh: Agustus 2026" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Gaji (Rp)</label>
+                    <input type="number" id="input-jumlah" placeholder="5000000" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+                    <select id="input-status" class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                        <option value="Diterima">Sudah Diterima</option>
+                        <option value="Belum">Belum Diterima</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeGajiModal()" class="flex-1 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition border border-slate-300">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl btn-gold text-xs font-bold shadow-md">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH PENGELUARAN -->
+    <div id="pengeluaran-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="glass-bright p-6 rounded-3xl w-full max-w-md border border-amber-400/60 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-gold-dark">Tambah Catatan Pengeluaran</h3>
+            <form onsubmit="savePengeluaran(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Keperluan</label>
+                    <input type="text" id="input-ket-pengeluaran" placeholder="Contoh: Belanja Bulanan" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah (Rp)</label>
+                    <input type="number" id="input-jumlah-pengeluaran" placeholder="500000" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal</label>
+                    <input type="date" id="input-tanggal-pengeluaran" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closePengeluaranModal()" class="flex-1 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition border border-slate-300">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl btn-gold text-xs font-bold shadow-md">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH LIST BELANJA & TAGIHAN -->
+    <div id="belanja-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="glass-bright p-6 rounded-3xl w-full max-w-md border border-amber-400/60 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-gold-dark">Tambah List Keperluan / Tagihan</h3>
+            <form onsubmit="saveBelanja(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Barang / Tagihan</label>
+                    <input type="text" id="input-nama-belanja" placeholder="Contoh: Skincare / Bayar Listrik" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Estimasi Harga (Rp)</label>
+                    <input type="number" id="input-harga-belanja" placeholder="250000" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Detail / Toko / Link</label>
+                    <input type="text" id="input-detail-belanja" placeholder="Contoh: Shopee / Toko Official" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+                    <select id="input-status-belanja" class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                        <option value="Belum">Belum Dibeli / Belum Lunas</option>
+                        <option value="Selesai">Sudah Dibeli / Lunas</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeBelanjaModal()" class="flex-1 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition border border-slate-300">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl btn-gold text-xs font-bold shadow-md">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH JADWAL CUTI -->
+    <div id="cuti-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm hidden">
+        <div class="glass-bright p-6 rounded-3xl w-full max-w-md border border-amber-400/60 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-gold-dark">Tambah Jadwal Cuti</h3>
+            <form onsubmit="saveCuti(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Keterangan / Jenis Cuti</label>
+                    <input type="text" id="input-ket-cuti" placeholder="Contoh: Cuti Tahunan / Liburan" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Mulai</label>
+                    <input type="date" id="input-mulai-cuti" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Selesai</label>
+                    <input type="date" id="input-selesai-cuti" required class="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-amber-400/50 text-sm text-slate-800 font-medium">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeCutiModal()" class="flex-1 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold transition border border-slate-300">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl btn-gold text-xs font-bold shadow-md">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // State Data Utama dengan Default Data Bawaan
+        let currentUser = localStorage.getItem('dashboard_current_user') || null;
+        let dbGaji = JSON.parse(localStorage.getItem('db_gaji')) || [
+            { id: 1, periode: 'Agustus 2026', jumlah: 22000000, status: 'Diterima' }
+        ];
+        let dbPengeluaran = JSON.parse(localStorage.getItem('db_pengeluaran')) || [
+            { id: 1, ket: 'Transportasi & Konsumsi', jumlah: 1500000, tanggal: '2026-08-10' }
+        ];
+        let dbBelanja = JSON.parse(localStorage.getItem('db_belanja')) || [
+            { id: 1, nama: 'Tagihan Internet', harga: 350000, detail: 'Indihome Official', status: 'Belum' }
+        ];
+        let dbCuti = JSON.parse(localStorage.getItem('db_cuti')) || [];
+
+        // Inisialisasi Saat Halaman Dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            if (currentUser) {
+                activateApp(currentUser);
+            }
+            loadProfilePhoto();
+            renderAllData();
+        });
+
+        // Autentikasi Sistem
+        function switchAuthView(view) {
+            document.getElementById('form-login-container').classList.add('hidden');
+            document.getElementById('form-register-container').classList.add('hidden');
+            document.getElementById('form-reset-container').classList.add('hidden');
+
+            if (view === 'login') document.getElementById('form-login-container').classList.remove('hidden');
+            if (view === 'register') document.getElementById('form-register-container').classList.remove('hidden');
+            if (view === 'reset') document.getElementById('form-reset-container').classList.remove('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value;
+            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
+
+            if (users[user] && users[user] === pass) {
+                localStorage.setItem('dashboard_current_user', user);
+                activateApp(user);
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const user = document.getElementById('reg-username').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
+
+            if (users[user]) {
+                document.getElementById('reg-error').classList.remove('hidden');
+                document.getElementById('reg-success').classList.add('hidden');
+            } else {
+                users[user] = pass;
+                localStorage.setItem('db_users', JSON.stringify(users));
+                document.getElementById('reg-error').classList.add('hidden');
+                document.getElementById('reg-success').classList.remove('hidden');
+                setTimeout(() => switchAuthView('login'), 1500);
+            }
+        }
+
+        function handleResetPassword(e) {
+            e.preventDefault();
+            const user = document.getElementById('reset-username').value.trim();
+            const newPass = document.getElementById('reset-new-password').value;
+            let users = JSON.parse(localStorage.getItem('db_users')) || { 'admin': 'admin123' };
+
+            if (users[user]) {
+                users[user] = newPass;
+                localStorage.setItem('db_users', JSON.stringify(users));
+                document.getElementById('reset-error').classList.add('hidden');
+                document.getElementById('reset-success').classList.remove('hidden');
+                setTimeout(() => switchAuthView('login'), 1500);
+            } else {
+                document.getElementById('reset-error').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('dashboard_current_user');
+            location.reload();
+        }
+
+        function activateApp(username) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            document.getElementById('current-admin-name').innerText = `Halo, selamat datang - ${username}`;
+        }
+
+        // Navigasi Tab
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Format Angka ke Rupiah
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+        }
+
+        // Render Data Tabel & Kalkulasi Otomatis
+        function renderAllData() {
+            // 1. Render Gaji
+            const tbodyGaji = document.getElementById('gaji-table-body');
+            tbodyGaji.innerHTML = '';
+            let totalGaji = 0;
+            let totalDiterima = 0;
+            let totalBelum = 0;
+
+            dbGaji.forEach((item, index) => {
+                totalGaji += Number(item.jumlah);
+                if (item.status === 'Diterima') totalDiterima += Number(item.jumlah);
+                else totalBelum += Number(item.jumlah);
+
+                tbodyGaji.innerHTML += `
+                    <tr class="hover:bg-amber-500/5 transition">
+                        <td class="p-4 font-semibold">${item.periode}</td>
+                        <td class="p-4 font-bold text-gold-dark">${formatRupiah(item.jumlah)}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${item.status === 'Diterima' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${item.status}</span></td>
+                        <td class="p-4 text-right"><button onclick="deleteGaji(${index})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-100 rounded-lg">Hapus</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('label-total-gaji').innerText = formatRupiah(totalGaji);
+            document.getElementById('card-total-diterima').innerText = formatRupiah(totalDiterima);
+            document.getElementById('card-total-belum').innerText = formatRupiah(totalBelum);
+
+            // 2. Render Pengeluaran
+            const tbodyPengeluaran = document.getElementById('pengeluaran-table-body');
+            tbodyPengeluaran.innerHTML = '';
+            let totalPengeluaran = 0;
+
+            dbPengeluaran.forEach((item, index) => {
+                totalPengeluaran += Number(item.jumlah);
+                tbodyPengeluaran.innerHTML += `
+                    <tr class="hover:bg-amber-500/5 transition">
+                        <td class="p-4 font-semibold">${item.ket}</td>
+                        <td class="p-4 font-bold text-rose-600">${formatRupiah(item.jumlah)}</td>
+                        <td class="p-4 text-slate-600">${item.tanggal}</td>
+                        <td class="p-4 text-right"><button onclick="deletePengeluaran(${index})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-100 rounded-lg">Hapus</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('label-total-pengeluaran').innerText = formatRupiah(totalPengeluaran);
+            document.getElementById('card-total-pengeluaran').innerText = formatRupiah(totalPengeluaran);
+
+            // 3. Render Belanja
+            const tbodyBelanja = document.getElementById('belanja-table-body');
+            tbodyBelanja.innerHTML = '';
+            let totalBelanja = 0;
+
+            dbBelanja.forEach((item, index) => {
+                totalBelanja += Number(item.harga);
+                tbodyBelanja.innerHTML += `
+                    <tr class="hover:bg-amber-500/5 transition">
+                        <td class="p-4 font-semibold">${item.nama}</td>
+                        <td class="p-4 font-bold text-pink-600">${formatRupiah(item.harga)}</td>
+                        <td class="p-4 text-slate-600">${item.detail}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${item.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}">${item.status}</span></td>
+                        <td class="p-4 text-right"><button onclick="deleteBelanja(${index})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-100 rounded-lg">Hapus</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('label-total-belanja').innerText = formatRupiah(totalBelanja);
+            document.getElementById('card-total-belanja').innerText = formatRupiah(totalBelanja);
+
+            // 4. Render Cuti
+            const tbodyCuti = document.getElementById('cuti-table-body');
+            tbodyCuti.innerHTML = '';
+            dbCuti.forEach((item, index) => {
+                tbodyCuti.innerHTML += `
+                    <tr class="hover:bg-amber-500/5 transition">
+                        <td class="p-4 font-semibold">${item.ket}</td>
+                        <td class="p-4 text-slate-600">${item.mulai}</td>
+                        <td class="p-4 text-slate-600">${item.selesai}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Agenda</span></td>
+                        <td class="p-4 text-right"><button onclick="deleteCuti(${index})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1 bg-rose-100 rounded-lg">Hapus</button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('label-total-cuti').innerText = `${dbCuti.length} Agenda`;
+
+            // 5. Hitung Tabungan Prediksi (Total Diterima - Total Pengeluaran - Total Belanja)
+            const tabunganPrediksi = totalDiterima - totalPengeluaran - totalBelanja;
+            document.getElementById('card-tabungan-prediksi').innerText = formatRupiah(tabunganPrediksi);
+
+            // Trigger Kalkulator THR
+            hitungTHR();
+        }
+
+        // Fungsi Modal & Operasi CRUD
+        function openGajiModal() { document.getElementById('gaji-modal').classList.remove('hidden'); }
+        function closeGajiModal() { document.getElementById('gaji-modal').classList.add('hidden'); }
+        function saveGaji(e) {
+            e.preventDefault();
+            dbGaji.push({
+                periode: document.getElementById('input-periode').value,
+                jumlah: Number(document.getElementById('input-jumlah').value),
+                status: document.getElementById('input-status').value
+            });
+            localStorage.setItem('db_gaji', JSON.stringify(dbGaji));
+            closeGajiModal();
+            renderAllData();
+        }
+        function deleteGaji(i) { dbGaji.splice(i, 1); localStorage.setItem('db_gaji', JSON.stringify(dbGaji)); renderAllData(); }
+
+        function openPengeluaranModal() { document.getElementById('pengeluaran-modal').classList.remove('hidden'); }
+        function closePengeluaranModal() { document.getElementById('pengeluaran-modal').classList.add('hidden'); }
+        function savePengeluaran(e) {
+            e.preventDefault();
+            dbPengeluaran.push({
+                ket: document.getElementById('input-ket-pengeluaran').value,
+                jumlah: Number(document.getElementById('input-jumlah-pengeluaran').value),
+                tanggal: document.getElementById('input-tanggal-pengeluaran').value
+            });
+            localStorage.setItem('db_pengeluaran', JSON.stringify(dbPengeluaran));
+            closePengeluaranModal();
+            renderAllData();
+        }
+        function deletePengeluaran(i) { dbPengeluaran.splice(i, 1); localStorage.setItem('db_pengeluaran', JSON.stringify(dbPengeluaran)); renderAllData(); }
+
+        function openBelanjaModal() { document.getElementById('belanja-modal').classList.remove('hidden'); }
+        function closeBelanjaModal() { document.getElementById('belanja-modal').classList.add('hidden'); }
+        function saveBelanja(e) {
+            e.preventDefault();
+            dbBelanja.push({
+                nama: document.getElementById('input-nama-belanja').value,
+                harga: Number(document.getElementById('input-harga-belanja').value),
+                detail: document.getElementById('input-detail-belanja').value,
+                status: document.getElementById('input-status-belanja').value
+            });
+            localStorage.setItem('db_belanja', JSON.stringify(dbBelanja));
+            closeBelanjaModal();
+            renderAllData();
+        }
+        function deleteBelanja(i) { dbBelanja.splice(i, 1); localStorage.setItem('db_belanja', JSON.stringify(dbBelanja)); renderAllData(); }
+
+        function openCutiModal() { document.getElementById('cuti-modal').classList.remove('hidden'); }
+        function closeCutiModal() { document.getElementById('cuti-modal').classList.add('hidden'); }
+        function saveCuti(e) {
+            e.preventDefault();
+            dbCuti.push({
+                ket: document.getElementById('input-ket-cuti').value,
+                mulai: document.getElementById('input-mulai-cuti').value,
+                selesai: document.getElementById('input-selesai-cuti').value
+            });
+            localStorage.setItem('db_cuti', JSON.stringify(dbCuti));
+            closeCutiModal();
+            renderAllData();
+        }
+        function deleteCuti(i) { dbCuti.splice(i, 1); localStorage.setItem('db_cuti', JSON.stringify(dbCuti)); renderAllData(); }
+
+        // Kalkulator THR & Penanganan Foto Profil
+        function hitungTHR() {
+            let gajiInput = document.getElementById('thr-gaji').value.replace(/[^0-9]/g, '');
+            let bulanBekerja = Number(document.getElementById('thr-bulan').value) || 0;
+            let gajiPokok = Number(gajiInput) || 0;
+
+            let hasilTHR = (bulanBekerja / 12) * gajiPokok;
+            document.getElementById('thr-hasil').innerText = formatRupiah(hasilTHR);
+            document.getElementById('card-total-thr').innerText = formatRupiah(hasilTHR);
+        }
+
+        function formatRupiahInput(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            input.value = val ? "Rp " + new Intl.NumberFormat('id-ID').format(val) : "";
+            hitungTHR();
+        }
+
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    localStorage.setItem('dashboard_profile_photo', event.target.result);
+                    loadProfilePhoto();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function loadProfilePhoto() {
+            const savedPhoto = localStorage.getItem('dashboard_profile_photo');
+            const preview = document.getElementById('profile-preview');
+            const placeholder = document.getElementById('profile-placeholder');
+            if (savedPhoto) {
+                preview.src = savedPhoto;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
